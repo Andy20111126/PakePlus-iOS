@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 关键：手机适配 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奶蛙-免费版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* 动图容器（适配竖屏） */
+        .gif-box {
+            width: 100%;
+            max-width: 400px;
+            height: 650px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .gif-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            padding: 20px 0;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #111;
+            color: white;
+            font-size: 22px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-btn-middle {
+            width: 130px;
+            border-radius: 30px;
+            font-size: 16px;
+        }
+
+        /* 通用弹窗样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 电脑端：设置界面左右两栏 */
+        @media (min-width: 768px) {
+            #settingsModal .modal-content {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+            .settings-left, .settings-right {
+                flex: 1;
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* ———— 卡包弹窗 ———— */
+        #cardModal .modal-content {
+            max-width: 400px;
+        }
+
+        .modal-title {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 22px;
+        }
+
+        .category {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .tags {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        .tag {
+            padding: 16px 12px;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tag:last-child {
+            border-bottom: none;
+        }
+
+        .tag:hover {
+            background: #eaeaea;
+        }
+
+        /* 设置弹窗样式（手机适配） */
+        .settings-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .settings-icon {
+            width: 150px;
+            height: 150px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+
+        .settings-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .settings-name {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .settings-dev {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .dev-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .dev-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .dev-name {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .dev-desc {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .settings-right {
+            width: 100%;
+        }
+
+        .review-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .review-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .review-author {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .review-time {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .review-stars {
+            color: #ff9800;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .review-content {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-content">
+    <div class="gif-box">
+        <img id="g1" alt="龟速前进">
+        <img id="g2" alt="惊鸿一瞥">
+        <img id="g3" alt="万有引力">
+        <img id="g4" alt="相视一笑">
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <button class="nav-btn" id="stopBtn">🚫</button>
+    <button class="nav-btn nav-btn-middle" id="openCard">🃏 卡包</button>
+    <button class="nav-btn" id="openSettings">⚙️</button>
+</div>
+
+<!-- 卡包弹窗 -->
+<div class="modal" id="cardModal">
+    <div class="modal-content">
+        <button class="close" id="closeModal">×</button>
+        <h2 class="modal-title">我的卡包</h2>
+
+        <div class="category">
+            <h3 class="category-title">动作</h3>
+            <div class="tags">
+                <div class="tag" data-id="1">龟速前进</div>
+                <div class="tag" data-id="2">惊鸿一瞥</div>
+            </div>
+        </div>
+
+        <div class="category">
+            <h3 class="category-title">场景</h3>
+            <div class="tags">
+                <div class="tag" data-id="3">万有引力</div>
+                <div class="tag" data-id="4">相视一笑</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 设置弹窗（已适配手机/电脑） -->
+<div class="modal" id="settingsModal">
+    <div class="modal-content">
+        <button class="close" id="closeSettingsModal">×</button>
+        <div class="settings-left">
+            <div class="settings-icon">
+                <img src="奶蛙图标.png" alt="奶蛙图标">
+            </div>
+            <div class="settings-name">奶蛙 - 免费版</div>
+            <div class="settings-dev">
+                <div class="dev-avatar">
+                    <img src="开发者头像.png" alt="开发者头像">
+                </div>
+                <div class="dev-name">耀西吆西</div>
+                <div class="dev-desc">世界更应该需要星期五</div>
+            </div>
+        </div>
+        <div class="settings-right">
+            <div class="review-title">自发布以来好评如潮</div>
+            <div class="review-item">
+                <div class="review-header">
+                    <span class="review-author">我是奶蛙！！！</span>
+                    <span class="review-time">4月7日</span>
+                </div>
+                <div class="review-stars">★★★★★</div>
+                <div class="review-content">
+                    质量非常好，与卖家描述一致，孩子们都特别喜欢吃，三个孩子撑死俩还有一个飞走了
+                    橘色系更加显白，洗完也很柔顺头发也不油了，屏幕清晰运行流畅，敏感肌用起来毫无压力，
+                    握感舒适不伤牙龈，每次炒菜都会放几本，很满意的一次购物。与卖家描述的完全一致，
+                    非常满意，真的很喜欢，完全超出期望值，发货速度非常快，包装非常仔细、严实，物流公司服务态度很好，
+                    运送速度很快，很满意的一次购物。一打开，看到包装，太可爱了，超级喜欢！东西也喜欢东西很喜欢，
+                    质量也很好的，这个价格能买到是真的很划算我来评价下这个宝贝，价格不错，质量不错，快递不错，
+                    老板不错。真的超级喜欢，非常支持，质量非常好，与卖家描述的完全一致，非常满意！一次很好的购物体验，
+                    服务周到，物流快速，配送也很周到，态度也很好，好评宝贝收到咯，真的很棒呀！质量真是没话说，非常满意！
+                    开心开心真的很喜欢，完全超出期望值，发货速度非常快，包装非常仔细、严实，运送速度很快，很满意的一次购物！
+                    非常值得信赖的品牌，质量有保障，价格还亲民，相当满意！质量非常好，客服态度非常非常赞，有问题及时给解决了
+                    快递小哥不错，服务也很周到，产品真的很好
+                </div>
+            </div>
+            <div class="review-item">
+                <div class="review-header">
+                    <span class="review-author">可是我觉得很神圣啊</span>
+                    <span class="review-time">4月2日</span>
+                </div>
+                <div class="review-stars">★</div>
+                <div class="review-content">
+                    非常失望，完全不是描述的那样。内裤质量远没有宣传的那么好，穿了几次就开始变形了。
+                    商家所谓的上门安装服务更是笑话，根本就是敷衍了事。使用起来一点都不舒适，而且洗的时候还掉色严重。
+                    孩子根本就不喜欢吃，老人也不会用，设计得一点也不合理，很容易起球，洗完之后还有残留。
+                    版型差，尺码也不标准，持妆效果差，洗完头发反而更油了，敏感肌使用后出现了不适。
+                    握感差，伤牙龈，炒菜放几滴之后味道怪怪的，质量跟卖家说的完全不一样。掉渣严重，捂脚，洗不干净，
+                    泡沫一点都不绵密。买了三包都浪费了，孩子们都不喜欢吃，版型差，面料不舒服，尺码也不标准，持妆效果差，
+                    橘色系一点都不是白，炒菜放几滴之后味道怪怪的，洗不干净。手机壳又贵又难看，每晚吃两片也没见变好看着，
+                    儿子说我越来越难看了，以后再也不买他家的狗粮了
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 两个音频：奶蛙音效 + 点击音效 -->
+<audio id="mainAudio" loop>
+<audio id="clickAudio">
+
+<script>
+// 动图+奶蛙音效资源
+const data = {
+  1: { gif: "龟速前进.gif", mp3: "龟速前行.mp3" },
+  2: { gif: "惊鸿一瞥.gif", mp3: "惊鸿一瞥.mp3" },
+  3: { gif: "万有引力.gif", mp3: "万有引力.mp3" },
+  4: { gif: "相视一笑.gif", mp3: "相视一笑.mp3" },
+};
+
+// 统一点击音效
+const clickSoundSrc = "MP3 音效.mp3";
+
+const imgs = {
+  1: document.getElementById("g1"),
+  2: document.getElementById("g2"),
+  3: document.getElementById("g3"),
+  4: document.getElementById("g4"),
+};
+
+const mainAudio = document.getElementById("mainAudio");   // 奶蛙声音
+const clickAudio = document.getElementById("clickAudio"); // 点击音效
+const cardModal = document.getElementById("cardModal");
+const settingsModal = document.getElementById("settingsModal");
+const stopBtn = document.getElementById("stopBtn");
+
+// 隐藏所有动图
+function hideAll() {
+  for (let i = 1; i <= 4; i++) imgs[i].style.display = "none";
+}
+
+// 停止奶蛙声音
+function stopMainAudio() {
+  mainAudio.pause();
+  mainAudio.currentTime = 0;
+}
+
+// 停止按钮
+stopBtn.onclick = () => {
+  hideAll();
+  stopMainAudio();
+};
+
+// 卡包选项点击：播放【点击音效】+ 播放【奶蛙声音】+ 切换动图
+document.querySelectorAll(".tag").forEach(t => {
+  t.onclick = () => {
+    const id = t.dataset.id;
+    const item = data[id];
+
+    // 1. 停止之前奶蛙声音
+    stopMainAudio();
+
+    // 2. 播放一次点击音效
+    clickAudio.src = clickSoundSrc;
+    clickAudio.currentTime = 0;
+    clickAudio.play().catch(e => console.log("点击音效播放被拦截：", e));
+
+    // 3. 切换动图
+    hideAll();
+    const img = imgs[id];
+    img.src = item.gif + "?t=" + Date.now();
+    img.style.display = "block";
+
+    // 4. 播放对应奶蛙声音（循环）
+    mainAudio.src = item.mp3;
+    mainAudio.play().catch(e => console.log("奶蛙音效播放被拦截：", e));
+
+    // 关闭卡包
+    cardModal.style.display = "none";
+  };
+});
+
+// 卡包弹窗开关
+document.getElementById("openCard").onclick = () => cardModal.style.display = "flex";
+document.getElementById("closeModal").onclick = () => cardModal.style.display = "none";
+cardModal.onclick = e => e.target === cardModal && (cardModal.style.display = "none");
+
+// 设置弹窗开关
+document.getElementById("openSettings").onclick = () => settingsModal.style.display = "flex";
+document.getElementById("closeSettingsModal").onclick = () => settingsModal.style.display = "none";
+settingsModal.onclick = e => e.target === settingsModal && (settingsModal.style.display = "none");
+</script>
+
+</body>
+</html>
